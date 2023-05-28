@@ -1,0 +1,13 @@
+{
+    "launch": {
+        "configurations": [
+            {
+                "type": "robotframework-lsp",
+                "name": "Robot Framework: Launch Template",
+                "request": "launch",
+                "terminal": "integrated",
+                "args": ["--outputdir", "output"]
+            }
+        ],
+    }
+}

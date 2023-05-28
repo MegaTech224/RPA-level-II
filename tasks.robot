@@ -18,7 +18,7 @@ Order robots from RobotSpareBin Industries Inc
 
 *** Keywords ***
 Open the robot order website
-    Open Available Browser    https://robotsparebinindustries.com/#/robot-order
+    Open Browser    https://robotsparebinindustries.com/#/robot-order    edge
 
 Get orders
     Download    https://robotsparebinindustries.com/orders.csv    overwrite=${True}    target_file=${OUTPUT DIR}${/}orders.csv
