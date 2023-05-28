@@ -8,6 +8,6 @@
                 "terminal": "integrated",
                 "args": ["--outputdir", "output", "--report", "NONE"]
             }
-        ],
+        ]
     }
 }
