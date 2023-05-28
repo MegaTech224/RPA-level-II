@@ -6,7 +6,7 @@
                 "name": "Robot Framework: Launch Template",
                 "request": "launch",
                 "terminal": "integrated",
-                "args": ["--outputdir", "output"]
+                "args": ["--outputdir", "output", "--report", "NONE"]
             }
         ],
     }
