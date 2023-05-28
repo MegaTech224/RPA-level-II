@@ -14,7 +14,7 @@ Library    RPA.Tables
 Order robots from RobotSpareBin Industries Inc
     Open the robot order website
     ${orders}=    Get orders
-
+    Log    ${orders}
 
 *** Keywords ***
 Open the robot order website
