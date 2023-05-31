@@ -54,9 +54,11 @@ Input the orders for all the robots
 Check for and resolve alert
     # Expected Server Error; Server Feeling Slightly Sick Error; Who Came Up With These Annoying Errors?!, Bear In Server Room Error (Order)
     ${alert}=    Is Element Visible    //div[@class='alert alert-danger']
-    WHILE    ${alert}
+    IF    ${alert}
+        Run Keyword And Continue On Failure    Element Should Not Be Visible    //div[@class='alert alert-danger']
         ${alertmessage}=    Get Text    //div[@class='alert alert-danger']
-        Log     ${alertmessage}
-        Click Button    Order
-        ${alert}=    Is Element Visible    //div[@class='alert alert-danger']
+        Log    ${alertmessage}
+        Scroll Element Into View    //*[@id="order"]
+        Wait And Click Button    //*[@id="order"]
+        Wait Until Element Is Not Visible    //div[@class='alert alert-danger']
     END   
