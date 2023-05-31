@@ -40,20 +40,23 @@ Build and order a robot
     Click Button    Preview
     Wait Until Element Is Visible    //div[@id='robot-preview-image']
     Click Button    Order
+    Check for and resolve alert
 
 Input the orders for all the robots
     [Arguments]    ${orders}
     FOR    ${order}    IN    @{orders}
-        Check for alert
         Build and order a robot    ${order}[Head]    ${order}[Body]    ${order}[Legs]    ${order}[Address]
         Wait Until Element Is Visible    //div[@id='receipt']
         Click Button    Order another robot
         Close the annoying modal
     END
 
-Check for alert
-    ${alert}=    Does Page Contain Element    //div[@class='alert alert-danger']    //*[@id="root"]/div/div[1]/div/div[1]/div
-    IF    ${alert}
+Check for and resolve alert
+    # Expected Server Error; Server Feeling Slightly Sick Error; Who Came Up With These Annoying Errors?!, Bear In Server Room Error (Order)
+    ${alert}=    Is Element Visible    //div[@class='alert alert-danger']
+    WHILE    ${alert}
         ${alertmessage}=    Get Text    //div[@class='alert alert-danger']
-        Fail    ${alertmessage}
-    END
+        Log     ${alertmessage}
+        Click Button    Order
+        ${alert}=    Is Element Visible    //div[@class='alert alert-danger']
+    END   
