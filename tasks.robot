@@ -40,7 +40,7 @@ Build and order a robot
     Click Button    Preview
     Wait Until Element Is Visible    //div[@id='robot-preview-image']
     Click Button    Order
-    Check for and resolve alert
+    Wait Until Keyword Succeeds    5x    1 sec    Check for and resolve alert
 
 Input the orders for all the robots
     [Arguments]    ${orders}
@@ -55,10 +55,8 @@ Check for and resolve alert
     # Expected Server Error; Server Feeling Slightly Sick Error; Who Came Up With These Annoying Errors?!, Bear In Server Room Error (Order)
     ${alert}=    Is Element Visible    //div[@class='alert alert-danger']
     IF    ${alert}
-        Run Keyword And Continue On Failure    Element Should Not Be Visible    //div[@class='alert alert-danger']
         ${alertmessage}=    Get Text    //div[@class='alert alert-danger']
         Log    ${alertmessage}
-        Scroll Element Into View    //*[@id="order"]
-        Wait And Click Button    //*[@id="order"]
-        Wait Until Element Is Not Visible    //div[@class='alert alert-danger']
-    END   
+        Click Button    //*[@id="order"]
+        Element Should Not Be Visible    //div[@class='alert alert-danger']
+    END
