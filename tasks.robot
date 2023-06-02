@@ -8,6 +8,9 @@ Documentation
 Library    RPA.Browser.Selenium    auto_close=${FALSE}
 Library    RPA.HTTP
 Library    RPA.Tables
+Library    RPA.PDF
+Library    RPA.FileSystem
+Library    RPA.Archive
 
 
 *** Tasks ***
@@ -16,11 +19,13 @@ Order robots from RobotSpareBin Industries Inc
     Close the annoying modal
     ${orders}=    Get orders
     Input the orders for all the robots    ${orders}
+    Create a ZIP file of receipt PDF files
 
 
 *** Keywords ***
 Open the robot order website
-    Open Browser    https://robotsparebinindustries.com/#/robot-order    edge
+    Open Browser    https://robotsparebinindustries.com/#/robot-order    edge    
+    Maximize Browser Window
 
 Get orders
     Download    https://robotsparebinindustries.com/orders.csv    overwrite=${True}    target_file=${OUTPUT DIR}${/}orders.csv
@@ -47,6 +52,9 @@ Input the orders for all the robots
     FOR    ${order}    IN    @{orders}
         Build and order a robot    ${order}[Head]    ${order}[Body]    ${order}[Legs]    ${order}[Address]
         Wait Until Element Is Visible    //div[@id='receipt']
+        ${pdf}=    Store the order receipt as a PDF file    ${order}[Order number]
+        ${screenshot}=    Take a screenshot of the robot image    ${order}[Order number]
+        Embed the robot screenshot to the receipt PDF file    ${pdf}    ${screenshot}
         Click Button    Order another robot
         Close the annoying modal
     END
@@ -60,3 +68,28 @@ Check for and resolve alert
         Click Button    //*[@id="order"]
         Element Should Not Be Visible    //div[@class='alert alert-danger']
     END
+
+Store the order receipt as a PDF file
+    [Arguments]    ${ordernr}
+    ${receipt}=    Get Element Attribute    //div[@id='order-completion']    outerHTML
+    ${path}=    Absolute Path    ${OUTPUT_DIR}${/}receipts${/}receipt_${ordernr}.pdf
+    Html To Pdf    ${receipt}    ${path}
+    RETURN    ${path}
+
+Take a screenshot of the robot image
+    [Arguments]    ${ordernr}
+    ${path}=    Absolute Path    ${OUTPUT_DIR}${/}images${/}robot_${ordernr}.png
+    Scroll Element Into View    //a[@class='attribution']
+    Capture Element Screenshot    //div[@id='robot-preview-image']    ${path}
+    RETURN    ${path}
+
+Embed the robot screenshot to the receipt PDF file
+    [Arguments]    ${pdf}    ${screenshot}
+    ${files}=    Create List
+    ...    ${pdf}
+    ...    ${screenshot}:align=center
+    Add Files To Pdf    ${files}    ${pdf}    append=${True}
+
+Create a ZIP file of receipt PDF files
+    ${files}=    Find files    ${OUTPUT_DIR}${/}receipts${/}*.pdf
+    Add To Archive    ${files}    ${OUTPUT_DIR}${/}receipts.zip
