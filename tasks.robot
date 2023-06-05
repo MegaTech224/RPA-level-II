@@ -54,9 +54,9 @@ Fill the from
 Download and store the receipt
     [Arguments]    ${ordernr}
     Wait Until Element Is Visible    //div[@id='receipt']
-    ${pdf}=    Store Html as PDF file    ${ordernr}
-    ${screenshot}=    Take a screenshot of image    ${ordernr}
-    Embed image in PDF file    ${pdf}    ${screenshot}
+    ${pdf}=    Store the receipt as a PDF file    ${ordernr}
+    ${screenshot}=    Take a screenshot of the robot    ${ordernr}
+    Embed the robot screenshot to the receipt PDF file    ${screenshot}    ${pdf}
 
 Order another robot
     Click Button    Order another robot
@@ -71,22 +71,22 @@ Check for and resolve alert
         Element Should Not Be Visible    //div[@class='alert alert-danger']
     END
 
-Store Html as PDF file
+Store the receipt as a PDF file
     [Arguments]    ${ordernr}
     ${receipt}=    Get Element Attribute    //div[@id='order-completion']    outerHTML
     ${path}=    Absolute Path    ${OUTPUT_DIR}${/}receipts${/}receipt_${ordernr}.pdf
     Html To Pdf    ${receipt}    ${path}
     RETURN    ${path}
 
-Take a screenshot of image
+Take a screenshot of the robot
     [Arguments]    ${ordernr}
     ${path}=    Absolute Path    ${OUTPUT_DIR}${/}images${/}robot_${ordernr}.png
     Scroll Element Into View    //a[@class='attribution']
     Capture Element Screenshot    //div[@id='robot-preview-image']    ${path}
     RETURN    ${path}
 
-Embed image in PDF file
-    [Arguments]    ${pdf}    ${screenshot}
+Embed the robot screenshot to the receipt PDF file
+    [Arguments]    ${screenshot}    ${pdf}
     ${files}=    Create List
     ...    ${screenshot}:align=center
     Add Files To Pdf    ${files}    ${pdf}    append=${True}
