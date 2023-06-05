@@ -15,12 +15,16 @@ Library    RPA.Archive
 
 *** Tasks ***
 Order robots from RobotSpareBin Industries Inc
+    [Teardown]    Close Browser
     Open the robot order website
-    Close the annoying modal
     ${orders}=    Get orders
-    Input the orders for all the robots    ${orders}
-    Create a ZIP file of receipt PDF files
-
+    FOR    ${order}    IN    @{orders}
+        Close the annoying modal
+        Fill the from    ${order}[Head]    ${order}[Body]    ${order}[Legs]    ${order}[Address]
+        Download and store the receipt    ${order}[Order number]
+        Order another robot
+    END
+    Archive output PDFs
 
 *** Keywords ***
 Open the robot order website
@@ -36,7 +40,7 @@ Close the annoying modal
     Click Button    OK
     Wait Until Element Is Not Visible    //div[@class='modal-content']
 
-Build and order a robot
+Fill the from
     [Arguments]    ${Head}    ${Body}    ${Legs}    ${Address}
     Select From List By Value    //*[@id="head"]    ${Head}
     Click Element    //input[@id='id-body-${Body}']
@@ -47,17 +51,15 @@ Build and order a robot
     Click Button    Order
     Wait Until Keyword Succeeds    5x    1 sec    Check for and resolve alert
 
-Input the orders for all the robots
-    [Arguments]    ${orders}
-    FOR    ${order}    IN    @{orders}
-        Build and order a robot    ${order}[Head]    ${order}[Body]    ${order}[Legs]    ${order}[Address]
-        Wait Until Element Is Visible    //div[@id='receipt']
-        ${pdf}=    Store the order receipt as a PDF file    ${order}[Order number]
-        ${screenshot}=    Take a screenshot of the robot image    ${order}[Order number]
-        Embed the robot screenshot to the receipt PDF file    ${pdf}    ${screenshot}
-        Click Button    Order another robot
-        Close the annoying modal
-    END
+Download and store the receipt
+    [Arguments]    ${ordernr}
+    Wait Until Element Is Visible    //div[@id='receipt']
+    ${pdf}=    Store Html as PDF file    ${ordernr}
+    ${screenshot}=    Take a screenshot of image    ${ordernr}
+    Embed image in PDF file    ${pdf}    ${screenshot}
+
+Order another robot
+    Click Button    Order another robot
 
 Check for and resolve alert
     # Expected Server Error; Server Feeling Slightly Sick Error; Who Came Up With These Annoying Errors?!, Bear In Server Room Error (Order)
@@ -69,27 +71,25 @@ Check for and resolve alert
         Element Should Not Be Visible    //div[@class='alert alert-danger']
     END
 
-Store the order receipt as a PDF file
+Store Html as PDF file
     [Arguments]    ${ordernr}
     ${receipt}=    Get Element Attribute    //div[@id='order-completion']    outerHTML
     ${path}=    Absolute Path    ${OUTPUT_DIR}${/}receipts${/}receipt_${ordernr}.pdf
     Html To Pdf    ${receipt}    ${path}
     RETURN    ${path}
 
-Take a screenshot of the robot image
+Take a screenshot of image
     [Arguments]    ${ordernr}
     ${path}=    Absolute Path    ${OUTPUT_DIR}${/}images${/}robot_${ordernr}.png
     Scroll Element Into View    //a[@class='attribution']
     Capture Element Screenshot    //div[@id='robot-preview-image']    ${path}
     RETURN    ${path}
 
-Embed the robot screenshot to the receipt PDF file
+Embed image in PDF file
     [Arguments]    ${pdf}    ${screenshot}
     ${files}=    Create List
-    ...    ${pdf}
     ...    ${screenshot}:align=center
     Add Files To Pdf    ${files}    ${pdf}    append=${True}
 
-Create a ZIP file of receipt PDF files
-    ${files}=    Find files    ${OUTPUT_DIR}${/}receipts${/}*.pdf
-    Add To Archive    ${files}    ${OUTPUT_DIR}${/}receipts.zip
+Archive output PDFs
+    Archive Folder With Zip    ${OUTPUT_DIR}${/}receipts      receipts.zip   include=*.pdf
